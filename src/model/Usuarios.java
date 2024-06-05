@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package model;
 
 import java.io.Serializable;
@@ -27,7 +24,7 @@ import javax.persistence.Table;
 @NamedQueries({
     @NamedQuery(name = "Usuarios.findAll", query = "SELECT u FROM Usuarios u"),
     @NamedQuery(name = "Usuarios.findByIdUsuario", query = "SELECT u FROM Usuarios u WHERE u.idUsuario = :idUsuario"),
-    @NamedQuery(name = "Usuarios.findByNome", query = "SELECT u FROM Usuarios u WHERE u.nome = :nome"),
+    @NamedQuery(name = "Usuarios.findByLogin", query = "SELECT u FROM Usuarios u WHERE u.login = :login"),
     @NamedQuery(name = "Usuarios.findBySenha", query = "SELECT u FROM Usuarios u WHERE u.senha = :senha")})
 public class Usuarios implements Serializable {
 
@@ -38,8 +35,8 @@ public class Usuarios implements Serializable {
     @Column(name = "idUsuario")
     private Integer idUsuario;
     @Basic(optional = false)
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "login")
+    private String login;
     @Basic(optional = false)
     @Column(name = "senha")
     private String senha;
@@ -53,9 +50,9 @@ public class Usuarios implements Serializable {
         this.idUsuario = idUsuario;
     }
 
-    public Usuarios(Integer idUsuario, String nome, String senha) {
+    public Usuarios(Integer idUsuario, String login, String senha) {
         this.idUsuario = idUsuario;
-        this.nome = nome;
+        this.login = login;
         this.senha = senha;
     }
 
@@ -67,12 +64,12 @@ public class Usuarios implements Serializable {
         this.idUsuario = idUsuario;
     }
 
-    public String getNome() {
-        return nome;
+    public String getLogin() {
+        return login;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getSenha() {
