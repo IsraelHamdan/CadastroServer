@@ -30,8 +30,7 @@ public class CadastroThread extends Thread {
 
             String login = in.readLine();
             String senha = in.readLine();
-            logger.log(Level.INFO, "Login recebido: " + login);
-            logger.log(Level.INFO, "Senha recebida");
+            
 
             Usuarios usuario = ctrlUsu.findUsuarioByLogin(login);
             if (usuario == null || !usuario.getSenha().equals(senha)) {
@@ -40,7 +39,7 @@ public class CadastroThread extends Thread {
                 return;
             }
             out.println("Login bem-sucedido");
-            logger.log(Level.INFO, "Login bem-sucedido para o usuário: " + login);
+            
 
             while (true) {
                 String command = in.readLine();

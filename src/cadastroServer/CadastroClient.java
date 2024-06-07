@@ -30,7 +30,9 @@ public class CadastroClient {
             System.out.println(res);
 
             if ("Login bem-sucedido".equals(res)) {
-                out.println("L");
+                System.out.println("Digite 'L' para exibir os produtos");
+                String command = console.readLine();
+                out.println(command);
                 String produtos;
                 while ((produtos = in.readLine()) != null && !produtos.equals("END")) {
                     System.out.println(produtos);
