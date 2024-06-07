@@ -1,23 +1,11 @@
-
 package cadastroServer;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.net.Socket;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.List;
-import java.util.zip.InflaterOutputStream;
-
 import controller.ProdutosJpaController;
 import controller.UsuariosJpaController;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-
+import java.io.*;
+import java.net.Socket;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Produtos;
 import model.Usuarios;
 
@@ -32,46 +20,52 @@ public class CadastroThread extends Thread {
         this.ctrlUsu = ctrlUsu;
         this.s1 = s1;
     }
-    
+
     @Override
     public void run() {
-        try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(s1.getInputStream()));
-                PrintWriter out = new PrintWriter(s1.getOutputStream(), true);
-        ) {
-            String login = (String) in.readLine();
-            String senha = (String) in.readLine();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(s1.getInputStream()));
+             PrintWriter out = new PrintWriter(s1.getOutputStream(), true)) {
+
+            logger.log(Level.INFO, "Thread iniciada para comunicação com o cliente");
+
+            String login = in.readLine();
+            String senha = in.readLine();
+            logger.log(Level.INFO, "Login recebido: " + login);
+            logger.log(Level.INFO, "Senha recebida");
+
             Usuarios usuario = ctrlUsu.findUsuarioByLogin(login);
-            if(usuario == null || !usuario.getSenha().equals(senha)) {
+            if (usuario == null || !usuario.getSenha().equals(senha)) {
                 out.println("Login inválido");
-                logger.log(Level.SEVERE, "Não foi posivel fazer login");
+                logger.log(Level.SEVERE, "Não foi possível fazer login");
                 return;
             }
             out.println("Login bem-sucedido");
-            String inputLine; 
-            while((inputLine = in.readLine()) != null) {
-                switch (inputLine) {
-                    case "LISTAR_PRODUTOS":
-                        List<Produtos> produtos = ctrl.findProdutoEntities();
-                        produtos.forEach(produto -> out.println(produto.getNome()));
-                        break;
-                    case "LISTAR_USUARIOS":
-                        List<Usuarios> usuarios = ctrlUsu.findUsuarioEntities();
-                        usuarios.forEach(u -> out.println(usuario.getLogin()));
-                        break;
-                    default: out.println("Comando invalido"); break;
+            logger.log(Level.INFO, "Login bem-sucedido para o usuário: " + login);
+
+            while (true) {
+                String command = in.readLine();
+                if (command == null) {
+                    break;
                 }
-                
+                logger.log(Level.INFO, "Comando recebido: " + command);
+                if ("L".equalsIgnoreCase(command)) {
+                    List<Produtos> produtos = ctrl.findProdutoEntities();
+                    produtos.forEach(produto -> out.println(produto.getNome()));
+                    out.println("END");
+                }  else {
+                    out.println("COMANDO INVALIDO");
+                }
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Erro ao se comunicar com o cliente: ", e);
         } finally {
             try {
-                s1.close();
-            } catch (Exception e){
-                logger.log(Level.SEVERE, "Erro fechar o socket", e);
+                if (s1 != null && !s1.isClosed()) {
+                    s1.close();
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Erro ao fechar o socket", e);
             }
         }
     }
-    
 }

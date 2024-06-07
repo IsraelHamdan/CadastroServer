@@ -19,12 +19,12 @@ import javax.persistence.criteria.CriteriaQuery;
 
 public class UsuariosJpaController implements Serializable {
     private static final Logger logger = Logger.getLogger(UsuariosJpaController.class.getName());
-    private EntityManagerFactory emf;
-    
-    public UsuariosJpaController() {
-        emf = Persistence.createEntityManagerFactory("NomeDaSuaUnidadeDePersistencia");
+    private EntityManagerFactory emf; 
+
+    public UsuariosJpaController(EntityManagerFactory emf) {
+        this.emf = emf;
     }
-    
+
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
     }

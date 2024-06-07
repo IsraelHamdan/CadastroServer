@@ -51,8 +51,6 @@ public class MovimentosJpaController implements Serializable {
             em.close();
         }
     }
-        
-        
     }
     
     public Movimentos findMovimento(Integer id) {
