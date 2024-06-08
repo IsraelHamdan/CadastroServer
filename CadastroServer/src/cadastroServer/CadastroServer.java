@@ -23,15 +23,11 @@ public class CadastroServer {
         ctrlUsu = new UsuariosJpaController(emf);
 
         try (ServerSocket serverSocket = new ServerSocket(4321)) {
-            logger.log(Level.INFO, "Tentando iniciar o servidor...");
-            logger.log(Level.INFO, "Servidor iniciado na porta 4321");
-
             while (true) {
                 try {
                     logger.log(Level.INFO, "Aguardando conexão do cliente...");
                     Socket clientSocket = serverSocket.accept();
                     if (clientSocket.isConnected()) {
-                        logger.log(Level.INFO, "Cliente conectado: " + clientSocket.getInetAddress());
                         CadastroThread ct = new CadastroThread(ctrl, ctrlUsu, clientSocket);
                         ct.start();
                     } else {

@@ -16,7 +16,6 @@ public class CadastroClient {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
             ) {
 
-            logger.log(Level.INFO, "Tentando se conectar ao servidor...");
             System.out.println("Insira o login:");
             String login = console.readLine();
             System.out.println("Insira a senha:");
@@ -26,7 +25,6 @@ public class CadastroClient {
             out.println(password);
 
             String res = in.readLine();
-            logger.log(Level.INFO, "Resposta do servidor: " + res);
             System.out.println(res);
 
             if ("Login bem-sucedido".equals(res)) {
