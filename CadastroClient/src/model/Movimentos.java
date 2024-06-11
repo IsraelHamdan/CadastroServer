@@ -140,7 +140,7 @@ public class Movimentos implements Serializable {
 
     @Override
     public String toString() {
-        return "cadastroserver.Movimentos[ idMovimento=" + idMovimento + " ]";
+        return "cadastroclient.model.Movimentos[ idMovimento=" + idMovimento + " ]";
     }
     
 }

@@ -124,7 +124,7 @@ public class Produtos implements Serializable {
 
     @Override
     public String toString() {
-        return "model.Produtos[ idProduto=" + idProduto + " ]";
+        return "cadastroclient.model.Produtos[ idProduto=" + idProduto + " ]";
     }
     
 }

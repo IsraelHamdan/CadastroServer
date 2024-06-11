@@ -1,13 +1,15 @@
 package cadastroServer;
-import controller.ProdutosJpaController;
-import controller.UsuariosJpaController;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import model.Produtos;
 import model.Usuarios;
+import controller.ProdutosJpaController;
+import controller.UsuariosJpaController;
+
 
 public class CadastroThread extends Thread {
     private final ProdutosJpaController ctrl;
@@ -51,9 +53,8 @@ public class CadastroThread extends Thread {
                     List<Produtos> produtos = ctrl.findProdutoEntities();
                     produtos.forEach(produto -> out.println(produto.getNome()));
                     out.println("END");
-                }  else {
-                    out.println("COMANDO INVALIDO");
-                }
+                } else logger.log(Level.INFO, "Comando invalido");
+                
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Erro ao se comunicar com o cliente: ", e);

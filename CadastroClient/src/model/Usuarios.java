@@ -113,7 +113,7 @@ public class Usuarios implements Serializable {
 
     @Override
     public String toString() {
-        return "model.Usuarios[ idUsuario=" + idUsuario + " ]";
+        return "cadastroclient.model.Usuarios[ idUsuario=" + idUsuario + " ]";
     }
     
 }

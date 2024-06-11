@@ -97,7 +97,7 @@ public class PessoasJuridicas implements Serializable {
 
     @Override
     public String toString() {
-        return "model.PessoasJuridicas[ idPJ=" + idPJ + " ]";
+        return "cadastroclient.model.PessoasJuridicas[ idPJ=" + idPJ + " ]";
     }
     
 }

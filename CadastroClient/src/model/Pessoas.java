@@ -167,7 +167,7 @@ public class Pessoas implements Serializable {
 
     @Override
     public String toString() {
-        return "model.Pessoas[ idPessoa=" + idPessoa + " ]";
+        return "cadastroclient.model.Pessoas[ idPessoa=" + idPessoa + " ]";
     }
     
 }
