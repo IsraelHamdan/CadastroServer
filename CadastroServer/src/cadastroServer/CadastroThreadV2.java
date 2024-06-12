@@ -18,17 +18,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+    
+
 public class CadastroThreadV2 extends Thread {
     private final PessoasJpaController ctrlPessoa;
     private final ProdutosJpaController ctrl;
     private final UsuariosJpaController ctrlUsu;
     private final MovimentosJpaController ctrlMov;
-    private final Movimentos movimentos;
 
-    private Produtos produto;
     
     private final Socket s1;
-    private static final Logger logger = Logger.getLogger(CadastroThread.class.getName());
+    private static final Logger logger = Logger.getLogger(CadastroThreadV2.class.getName());
 
     public CadastroThreadV2(ProdutosJpaController ctrl, UsuariosJpaController ctrlUsu,
             MovimentosJpaController ctrlMov, PessoasJpaController ctrlPessoa, Socket s1) {
@@ -36,7 +36,7 @@ public class CadastroThreadV2 extends Thread {
         this.ctrlUsu = ctrlUsu;
         this.ctrlMov = ctrlMov;
         this.ctrlPessoa = ctrlPessoa;
-        movimentos = new Movimentos();
+        
         this.s1 = s1;
     }
     
@@ -49,61 +49,79 @@ public class CadastroThreadV2 extends Thread {
     }
     
     private void sellingProduct(ObjectInputStream in, ObjectOutputStream out, String command) throws IOException, ClassNotFoundException {
-        produto = ctrl.findProduto(in.readInt());
-        if (!isStocked(produto)) return;
-        
-        int quantidade = in.readInt();
-
-        movimentos.setIdPessoa(ctrlPessoa.findPessoa(in.readInt()));
+        Integer  idProduto = Integer.parseInt((String)in.readObject());
+        Produtos produto = ctrl.findProduto(idProduto);
+        Movimentos movimentos = new Movimentos();
         movimentos.setIdProduto(produto);
-        movimentos.setIdUsuario(ctrlUsu.findUsuario(in.readInt()));
-        movimentos.setTipo(command);
-        movimentos.setValorUnitario(in.readFloat());
-        movimentos.setQuantidade(quantidade);
-
-        produto.setQuantidade(produto.getQuantidade() + quantidade);
-        try {
-            ctrl.edit(produto);
-            ctrlMov.create(movimentos);
-        } catch (NonexistentEntityException | PreexistingEntityException ex) {
-            logger.log(Level.SEVERE, "Erro ao vender o produto", ex);
-        }
-    }
-    
-    private void buyingProduct(ObjectInputStream in, ObjectOutputStream out, String command)  throws IOException, NonexistentEntityException {
-        produto = ctrl.findProduto(in.readInt());
-        if (!isStocked(produto)) return;
         
-        int quantidade = in.readInt();
+        Integer idPessoa = Integer.parseInt((String) in.readObject());
+        movimentos.setIdPessoa(ctrlPessoa.findPessoa(idPessoa));
+        System.out.println("nome da pessoa: " + movimentos.getIdPessoa().getNome());
         
-        movimentos.setIdPessoa(ctrlPessoa.findPessoa(in.readInt()));
-        movimentos.setIdProduto(produto);
-        movimentos.setIdUsuario(ctrlUsu.findUsuario(in.readInt()));
+        Integer idUser = Integer.parseInt((String) in.readObject());
+        movimentos.setIdUsuario(ctrlUsu.findUsuario(idUser));
+        System.out.println("nome do usuario: " + movimentos.getIdUsuario().getLogin());
+        
         movimentos.setTipo(command);
-        movimentos.setValorUnitario(in.readFloat());
+        
+        int quantidade = Integer.parseInt((String) in.readObject());
         movimentos.setQuantidade(quantidade);
-
+        System.out.println("quantidade" + quantidade);
+        
+        Float preco = Float.parseFloat((String) in.readObject());
+        movimentos.setValorUnitario(preco);
+        
         produto.setQuantidade(produto.getQuantidade() - quantidade);
         try {
             ctrl.edit(produto);
             ctrlMov.create(movimentos);
-        } catch (PreexistingEntityException ex) {
-            logger.log(Level.SEVERE, "Não foi possivel adicionar o produto ao estoque", ex);
+            out.writeObject("Produto vendido com sucesso");
+        } catch (NonexistentEntityException | PreexistingEntityException ex) {
+            logger.log(Level.SEVERE, "Erro ao vender o produto", ex);
+            out.writeObject("Erro ao vender o produto");
+        }
+    }
+    
+    private void buyingProduct(ObjectInputStream in, ObjectOutputStream out, String command)  throws IOException, ClassNotFoundException, NonexistentEntityException {
+        Integer  idProduto = Integer.parseInt((String)in.readObject());
+        Produtos produto = ctrl.findProduto(idProduto);
+        Movimentos movimentos = new Movimentos();
+        movimentos.setIdProduto(produto);
+        
+        Integer idPessoa = Integer.parseInt((String) in.readObject());
+        movimentos.setIdPessoa(ctrlPessoa.findPessoa(idPessoa));
+        System.out.println("nome da pessoa: " + movimentos.getIdPessoa().getNome());
+        
+        Integer idUser = Integer.parseInt((String) in.readObject());
+        movimentos.setIdUsuario(ctrlUsu.findUsuario(idUser));
+        System.out.println("nome do usuario: " + movimentos.getIdUsuario().getLogin());
+        
+        movimentos.setTipo(command);
+        
+        int quantidade = Integer.parseInt((String) in.readObject());
+        movimentos.setQuantidade(quantidade);
+        System.out.println("quantidade" + quantidade);
+        
+        Float preco = Float.parseFloat((String) in.readObject());
+        movimentos.setValorUnitario(preco);
+        
+        produto.setQuantidade(produto.getQuantidade() + quantidade);
+        try {
+            ctrl.edit(produto);
+            ctrlMov.create(movimentos);
+            out.writeObject("Produto vendido com sucesso");
+        } catch (NonexistentEntityException | PreexistingEntityException ex) {
+            logger.log(Level.SEVERE, "Erro ao vender o produto", ex);
+            out.writeObject("Erro ao vender o produto");
         }
     }
     
     private void ListingProducts(ObjectOutputStream out) throws IOException {
         List<Produtos> produtos = ctrl.findProdutoEntities();
-        produtos.forEach(produto -> {
-            try {
-                out.writeObject(produto.getNome());
-            } catch (IOException ex) {
-                Logger.getLogger(CadastroThreadV2.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        for (Produtos produto : produtos) {
+            out.writeObject(produto.getNome() + " - Quantidade: " + produto.getQuantidade());
+        }
         out.writeObject("END");
-
-       
     }
 
     @Override
@@ -115,7 +133,6 @@ public class CadastroThreadV2 extends Thread {
 
             String login = (String) in.readObject();
             String senha = (String) in.readObject();
-            
 
             Usuarios usuario = ctrlUsu.findUsuarioByLogin(login);
             if (usuario == null || !usuario.getSenha().equals(senha)) {
@@ -124,22 +141,36 @@ public class CadastroThreadV2 extends Thread {
                 return;
             }
             out.writeObject("Login bem-sucedido");
-            
 
-            while (true) {
-                String command = in.readLine();
+            boolean running = true;
+            while (running) {
+                String command = (String) in.readObject();
                 if (command == null) break;
                 logger.log(Level.INFO, "Comando recebido: " + command);
                 
-                if("L".equalsIgnoreCase(command)) ListingProducts(out);
-                if("E".equalsIgnoreCase(command)) buyingProduct(in, out, command);
-                if("S".equalsIgnoreCase(command)) sellingProduct(in, out, command);
-                if("F".equalsIgnoreCase(command)) break;
+                switch (command.toUpperCase()) {
+                    case "L":
+                        ListingProducts(out);
+                        break;
+                    case "E":
+                        buyingProduct(in, out, command);
+                        break;
+                    case "S":
+                        sellingProduct(in, out, command);
+                        break;
+                    case "F":
+                        running = false;
+                        break;
+                    default:
+                        logger.log(Level.WARNING, "Comando desconhecido: " + command);
+                        out.writeObject("Comando desconhecido: " + command);
+                        break;
+                }
             }
         } catch (IOException | ClassNotFoundException e) {
             logger.log(Level.SEVERE, "Erro ao se comunicar com o cliente: ", e);
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(CadastroThreadV2.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Erro ao editar entidade", ex);
         } finally {
             try {
                 if (s1 != null && !s1.isClosed()) {
