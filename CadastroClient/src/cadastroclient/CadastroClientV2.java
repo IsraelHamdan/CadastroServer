@@ -5,92 +5,122 @@ import java.net.Socket;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 public class CadastroClientV2 {
+    private SaidaFrame frame;
+    private ThreadClient tc;
 
     private static final Logger LOGGER = Logger.getLogger(CadastroClientV2.class.getName());
 
-    public static void main(String[] args) {
+    public CadastroClientV2() {
+        frame = new SaidaFrame();
+        
+        
+    }
+    
+    private  void display(String msg) {
+        SwingUtilities.invokeLater(() -> frame.getTextArea().append(msg + "\n"));
+    }
+
+    private void conect() {
         try (Socket socket = new Socket("localhost", 4321);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
 
             LOGGER.log(Level.INFO, "Cliente conectado ao servidor");
 
-            System.out.println("===================Login====================");
-            System.out.println("Insira o login:");
+            System.out.println("Insira o login");
             String login = console.readLine();
-            System.out.println("Insira a senha:");
+            
+            System.out.println("Insria a senha ");
             String password = console.readLine();
 
-            out.writeObject(login);
-            out.writeObject(password);
+            out.println(login);
+            out.println(password);
 
-            String res = (String) in.readObject();
+            String res = in.readLine();
             System.out.println(res);
 
             if ("Login bem-sucedido".equals(res)) {
+                display("Escolha uma opção");
                 boolean running = true;
                 while (running) {
-                    System.out.println("""
-                            ========Opções========
-                            L - Listar 
-                            E - Entrada 
-                            S - Saida 
-                            F - Finalizar 
-                            """);
-                    String command = console.readLine();
-                    out.writeObject(command);
-                    switch (command) {
+                    tc = new ThreadClient(in, frame.getTextArea());
+                    display("L -> Listar | E -> Entrada | S -> Saída | X - Finalizar");
+                    String command = JOptionPane.showInputDialog("Escolha uma opção");
+                    out.println(command);
+                    tc.start();
+                    switch (command.toUpperCase()) {
                         case "L":
-                            String produtos;
-                            while ((produtos = (String) in.readObject()) != null && !produtos.equals("END")) {
-                                System.out.println(produtos);
-                            }
+                            handleListProducts(in);
                             break;
-                        case "E": handleMoviment(console, out, in, command); 
-                        case "S": handleMoviment(console, out, in, command);
+                        case "E": handleMoviment(out, in);
+                            break;
+                        case "S": handleMoviment(out, in);
+                            break;
                         case "F":
-                            out.writeObject(command);
                             running = false;
                             break;
                         default:
-                            System.out.println("Opção invalida");
+                            System.out.println("Opção inválida");
                             break;
                     }
                 }
             } else {
                 System.out.println("Falha no login: " + res);
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Não foi possível se conectar ao servidor", e);
         }
     }
 
-    private static void handleMoviment(BufferedReader console, ObjectOutputStream out, ObjectInputStream in, String command) throws IOException {
+    private void handleListProducts(BufferedReader in) throws IOException {
         try {
-            System.out.println("Insira o ID do produto");
-            out.writeObject(console.readLine());
-            
-            System.out.println("Insira o ID da pessoa");
-            out.writeObject(console.readLine());
-
-            System.out.println("Insira o Id do Usuario");
-            out.writeObject(console.readLine());
-            
-//            out.writeObject(command);
-            
-            System.out.println("Insira a quantidade");
-            out.writeObject(console.readLine());
-
-            System.out.println("Insira o valor_unitário ");
-            out.writeObject(console.readLine());
-
-            String response = (String) in.readObject();
-            System.out.println(response);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Erro ao ler a resposta do servidor");
+            String produtos;
+            while ((produtos = in.readLine()) != null && !produtos.equals("END")) {
+               display(produtos);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Não foi possivel listar os produtos, pelo motivo de: ", e);
         }
+
     }
+
+    private  void handleMoviment(PrintWriter out, BufferedReader in) throws IOException {
+        
+        String idProduto = JOptionPane.showInputDialog("Insira o ID do produto");
+        out.println(idProduto);
+        
+        String idPessoa = JOptionPane.showInputDialog("Insira o id da pessoa");
+        out.println(idPessoa);
+
+        String idUsuario = JOptionPane.showInputDialog("Insira o Id do Usuario");
+        out.println(idUsuario);      
+        
+        String quantidade = JOptionPane.showInputDialog("Insira a quantidade");
+        out.println(quantidade);
+
+        String preco = JOptionPane.showInputDialog("Insira o valor unitário");
+        out.println(preco);
+
+        String response = in.readLine();
+        display(response);
+         
+        String movimentInfo;
+        while ((movimentInfo = in.readLine()) != null && !movimentInfo.equals("END")) {
+            display(movimentInfo);
+        }
+        
+    }
+   
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            CadastroClientV2 client = new CadastroClientV2();
+            client.conect();
+        });
+    }
+    
 }
