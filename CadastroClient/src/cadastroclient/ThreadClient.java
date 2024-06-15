@@ -11,11 +11,11 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 public class ThreadClient extends Thread {
-    private Produtos produtos;
+    
     private final BufferedReader in; 
-    private BufferedReader res;
-    private JTextArea textArea;
-    private SaidaFrame frame;
+
+    private final JTextArea textArea;
+
    
     private static final java.util.logging.Logger LOGGER = Logger.getLogger(CadastroClientV2.class.getName());
 
@@ -28,15 +28,17 @@ public class ThreadClient extends Thread {
     public void run() {
        try {
            while (true) {
-               String recivedMessage = in.readLine();
+                String recivedMessage = in.readLine();
                if (recivedMessage == null) {
                    break;
                }
-               if (recivedMessage.startsWith("Produto: ")) {
-                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
-               } else {
-                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
-               }
+               SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
+               System.out.println("recived mensage: " + recivedMessage);
+//               if (recivedMessage.startsWith("Produtos: ")) {
+//                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
+//               } else if (recivedMessage.startsWith("Movimento: ")) {
+//                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
+//               }
            }
        } catch (IOException e) {
            LOGGER.log(Level.SEVERE, "Não foi possiivel realizar a operação", e);

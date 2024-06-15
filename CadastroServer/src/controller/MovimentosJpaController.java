@@ -69,10 +69,10 @@ public class MovimentosJpaController implements Serializable {
         return null;
     }
     
-    public List<Movimentos> findProdutoEntities() {
-        return findProdutoEntities(true, -1, -1);
+    public List<Movimentos> findMovimentoEntities() {
+        return findMovimentoEntities(true, -1, -1);
     }
-    public List<Movimentos> findProdutoEntities (boolean all, int maxResults, int firstResult) {
+    public List<Movimentos> findMovimentoEntities (boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery<Movimentos> cq = em.getCriteriaBuilder().createQuery(Movimentos.class);

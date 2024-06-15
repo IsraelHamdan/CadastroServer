@@ -40,6 +40,7 @@ public class CadastroThreadV2 extends Thread {
     }
    
     private void sellingProduct(BufferedReader in, PrintWriter out, String command) throws IOException {
+        
         Integer idProduto = Integer.parseInt(in.readLine());
         Produtos produto = ctrl.findProduto(idProduto);
         Movimentos movimentos = new Movimentos();
@@ -47,17 +48,15 @@ public class CadastroThreadV2 extends Thread {
         
         Integer idPessoa = Integer.parseInt(in.readLine());
         movimentos.setIdPessoa(ctrlPessoa.findPessoa(idPessoa));
-        System.out.println("nome da pessoa: " + movimentos.getIdPessoa().getNome());
         
         Integer idUser = Integer.parseInt(in.readLine());
         movimentos.setIdUsuario(ctrlUsu.findUsuario(idUser));
-        System.out.println("nome do usuario: " + movimentos.getIdUsuario().getLogin());
         
         movimentos.setTipo(command);
         
         int quantidade = Integer.parseInt(in.readLine());
         movimentos.setQuantidade(quantidade);
-        System.out.println("quantidade: " + quantidade);
+        
         
         Float preco = Float.parseFloat(in.readLine());
         movimentos.setValorUnitario(preco);
@@ -67,7 +66,7 @@ public class CadastroThreadV2 extends Thread {
             ctrl.edit(produto);
             ctrlMov.create(movimentos);
             out.println("Produto vendido com sucesso");
-            outputMovimment(out, movimentos);
+            outputMovimment(out);
         } catch (NonexistentEntityException | PreexistingEntityException ex) {
             logger.log(Level.SEVERE, "Erro ao vender o produto", ex);
             out.println("Erro ao vender o produto");
@@ -82,17 +81,15 @@ public class CadastroThreadV2 extends Thread {
         
         Integer idPessoa = Integer.parseInt(in.readLine());
         movimentos.setIdPessoa(ctrlPessoa.findPessoa(idPessoa));
-        System.out.println("nome da pessoa: " + movimentos.getIdPessoa().getNome());
-        
+
         Integer idUser = Integer.parseInt(in.readLine());
         movimentos.setIdUsuario(ctrlUsu.findUsuario(idUser));
-        System.out.println("nome do usuario: " + movimentos.getIdUsuario().getLogin());
-        
+
         movimentos.setTipo(command);
         
         int quantidade = Integer.parseInt(in.readLine());
         movimentos.setQuantidade(quantidade);
-        System.out.println("quantidade: " + quantidade);
+       
         
         Float preco = Float.parseFloat(in.readLine());
         movimentos.setValorUnitario(preco);
@@ -102,7 +99,7 @@ public class CadastroThreadV2 extends Thread {
             ctrl.edit(produto);
             ctrlMov.create(movimentos);
             out.println("Produto comprado com sucesso");
-            outputMovimment(out, movimentos);
+            outputMovimment(out);
         } catch (NonexistentEntityException | PreexistingEntityException ex) {
             logger.log(Level.SEVERE, "Erro ao comprar o produto", ex);
             out.println("Erro ao comprar o produto");
@@ -112,20 +109,29 @@ public class CadastroThreadV2 extends Thread {
     private void ListingProducts(PrintWriter out) {
         List<Produtos> produtos = ctrl.findProdutoEntities();
         for (Produtos produto : produtos) {
-            out.println(produto.getNome() + " - Quantidade: " + produto.getQuantidade());
+            out.println("Produtos: " + produto.getNome() + " - Quantidade: " + produto.getQuantidade());
         }
         out.println("END");
     }
     
-    private void outputMovimment(PrintWriter out, Movimentos movimento) {
-        String movimentInfo = String.format("Movimento: %s\nProduto: %s\nPessoa: %s\nQuantidade: %d\nValor Unitário: %.2f\nUsuário: %s",
-                movimento.getTipo(), 
-                movimento.getIdProduto().getNome(), 
-                movimento.getIdPessoa().getNome(), 
-                movimento.getQuantidade(), 
-                movimento.getValorUnitario(), 
-                movimento.getIdUsuario().getLogin());
-        out.println(movimentInfo);
+    private void outputMovimment(PrintWriter out) {
+        List<Movimentos> movimentos = ctrlMov.findMovimentoEntities();
+        int indice = movimentos.size() -1;
+        String tipo = movimentos.get(indice).getTipo();
+        String loginU = movimentos.get(indice).getIdUsuario().getLogin() ;
+        String produto = movimentos.get(indice).getIdProduto().getNome();
+        String pessoa = movimentos.get(indice).getIdPessoa().getNome();
+        Float valor = movimentos.get(indice).getQuantidade() * movimentos.get(indice).getIdProduto().getPreco();
+        
+        String msg = String.format("Movimento: "+"Tipo: %s | Usuario: %s | Produto: %s | Pessoa: %s | valor %.2f"  , tipo, 
+                loginU, produto,pessoa,valor
+        ) ;
+        out.println("begin");
+        out.println(msg);
+        out.flush();
+        out.println("END");
+        System.out.println(msg);
+                
     }
 
     @Override
