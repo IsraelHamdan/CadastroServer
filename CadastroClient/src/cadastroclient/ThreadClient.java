@@ -1,23 +1,14 @@
 package cadastroclient;
-import java.util.List;
 
-import model.Produtos;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 public class ThreadClient extends Thread {
-    
-    private final BufferedReader in; 
 
+    private final BufferedReader in;
     private final JTextArea textArea;
-
-   
-    private static final java.util.logging.Logger LOGGER = Logger.getLogger(CadastroClientV2.class.getName());
 
     public ThreadClient(BufferedReader in, JTextArea textArea) {
         this.in = in;
@@ -26,22 +17,55 @@ public class ThreadClient extends Thread {
 
     @Override
     public void run() {
-       try {
-           while (true) {
-                String recivedMessage = in.readLine();
-               if (recivedMessage == null) {
-                   break;
-               }
-               SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
-               System.out.println("recived mensage: " + recivedMessage);
-//               if (recivedMessage.startsWith("Produtos: ")) {
-//                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
-//               } else if (recivedMessage.startsWith("Movimento: ")) {
-//                   SwingUtilities.invokeLater(() -> textArea.append(recivedMessage + "\n"));
-//               }
-           }
-       } catch (IOException e) {
-           LOGGER.log(Level.SEVERE, "Não foi possiivel realizar a operação", e);
-       }
+        try {
+            String mensagem;
+            while ((mensagem = in.readLine()) != null) {
+                processarMensagem(mensagem);
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler mensagem do servidor: " + e.getMessage());
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    System.out.println("Erro ao fechar BufferedReader: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void processarMensagem(String mensagem) {
+        SwingUtilities.invokeLater(() -> {
+            if (mensagem.startsWith("Produtos: ")) {
+                exibirListaDeProdutos(mensagem.substring("Produtos: ".length()));
+            } else if (mensagem.startsWith("Movimento: ")) {
+                exibirMovimento(mensagem.substring("Movimento: ".length()));
+            } else {
+                exibirMensagem(mensagem);
+            }
+        });
+    }
+
+    private JTextArea exibirListaDeProdutos(String produtosInfo) {
+        textArea.append("Lista de Produtos:\n");
+        String[] produtos = produtosInfo.split(";");
+        for (String produto : produtos) {
+            textArea.append(produto + "\n");
+        }
+        textArea.append("--------------------\n");
+        return textArea;
+    }
+
+    private JTextArea exibirMovimento(String movimentoInfo) {
+        textArea.append("Detalhes do Movimento:\n");
+        textArea.append(movimentoInfo + "\n");
+        textArea.append("--------------------\n");
+        return textArea;
+    }
+
+    private JTextArea exibirMensagem(String mensagem) {
+        textArea.append(mensagem + "\n");
+        return textArea;
     }
 }

@@ -40,7 +40,6 @@ public class CadastroThreadV2 extends Thread {
     }
    
     private void sellingProduct(BufferedReader in, PrintWriter out, String command) throws IOException {
-        
         Integer idProduto = Integer.parseInt(in.readLine());
         Produtos produto = ctrl.findProduto(idProduto);
         Movimentos movimentos = new Movimentos();

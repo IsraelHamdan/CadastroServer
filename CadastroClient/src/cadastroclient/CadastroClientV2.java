@@ -16,7 +16,7 @@ public class CadastroClientV2 {
     public CadastroClientV2() {
         frame = new SaidaFrame();
     }
-    
+
     private void display(String msg) {
         SwingUtilities.invokeLater(() -> frame.getTextArea().append(msg + "\n"));
     }
@@ -31,7 +31,7 @@ public class CadastroClientV2 {
 
             System.out.println("Insira o login:");
             String login = console.readLine();
-            
+
             System.out.println("Insira a senha:");
             String password = console.readLine();
 
@@ -55,11 +55,11 @@ public class CadastroClientV2 {
 
                     switch (command.toUpperCase()) {
                         case "L":
-                            handleListProducts(in);
+                            // Nada a fazer, ThreadClient irá lidar com a resposta
                             break;
-                        case "E": 
-                        case "S": 
-                            handleMoviment(out, in, console);
+                        case "E":
+                        case "S":
+                            handleMoviment(out, console, command.toUpperCase());
                             break;
                         case "F":
                             running = false;
@@ -78,45 +78,21 @@ public class CadastroClientV2 {
         }
     }
 
-    private void handleListProducts(BufferedReader in) throws IOException {
-        try {
-            String produtos;
-            while ((produtos = in.readLine()) != null && !produtos.equals("END")) {
-                display(produtos);
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Não foi possível listar os produtos", e);
-        }
-    }
-
-    private void handleMoviment(PrintWriter out, BufferedReader in, BufferedReader console) throws IOException {
-        System.out.println("Insira o id do produto:");
-        String idProduto = console.readLine();
+    private void handleMoviment(PrintWriter out, BufferedReader console, String command) throws IOException {
+        String idProduto = JOptionPane.showInputDialog("Insira o id do produto");
         out.println(idProduto);
 
-        System.out.println("Insira o id da pessoa:");
-        String idPessoa = console.readLine();
+        String idPessoa = JOptionPane.showInputDialog("Insira o id da pessoa");
         out.println(idPessoa);
 
-        System.out.println("Insira o id do usuário:");
-        String idUsuario = console.readLine();
+        String idUsuario = JOptionPane.showInputDialog("Insira o id do usuario");
         out.println(idUsuario);
 
-        System.out.println("Insira a quantidade:");
-        String quantidade = console.readLine();
+        String quantidade = JOptionPane.showInputDialog("Insira a quantidade");
         out.println(quantidade);
 
-        System.out.println("Insira o preço:");
-        String preco = console.readLine();
+        String preco = JOptionPane.showInputDialog("Insira o valor do produto");
         out.println(preco);
-
-        String response = in.readLine();
-        display(response);
-
-        String movimentInfo;
-        while ((movimentInfo = in.readLine()) != null && !movimentInfo.equals("END")) {
-            display(movimentInfo);
-        }
     }
 
     public static void main(String[] args) {
